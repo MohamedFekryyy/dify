@@ -440,6 +440,8 @@ services:
   web:
     image: langgenius/dify-web:0.15.2
     restart: always
+    networks:
+      - default
     environment:
       CONSOLE_API_URL: ${CONSOLE_API_URL:-}
       APP_API_URL: ${APP_API_URL:-}
@@ -449,6 +451,18 @@ services:
       CSP_WHITELIST: ${CSP_WHITELIST:-}
       TOP_K_MAX_VALUE: ${TOP_K_MAX_VALUE:-}
       INDEXING_MAX_SEGMENTATION_TOKENS_LENGTH: ${INDEXING_MAX_SEGMENTATION_TOKENS_LENGTH:-}
+      NODE_OPTIONS: "--max-old-space-size=1536"  # Set Node.js memory limit to 1.5GB
+    deploy:
+      resources:
+        limits:
+          memory: 2g
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      - api
 
   # The postgres database.
   db:
